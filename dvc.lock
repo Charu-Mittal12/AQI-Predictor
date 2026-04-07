@@ -1,0 +1,145 @@
+schema: '2.0'
+stages:
+  setup_config:
+    cmd: python scripts/setup_config.py --kaggle-st data/raw/cpcb/stations.csv 
+      --mode all --city Chennai --out config/stations.csv
+    deps:
+    - path: data/raw/cpcb/stations.csv
+      hash: md5
+      md5: 5567840d30fee1770507b539a2cd1fdb
+      size: 14467
+    - path: scripts/setup_config.py
+      hash: md5
+      md5: eef0ed4e47373bda24df4bcfac293edb
+      size: 2162
+    params:
+      params.yaml:
+        city: Chennai
+        mode: all
+    outs:
+    - path: config/stations.csv
+      hash: md5
+      md5: d96dbca851b52b14496e585a34c1515d
+      size: 7155
+  prepare_pollution:
+    cmd: python scripts/prepare_pollution.py --input 
+      data/raw/cpcb/station_hour.csv --kaggle-st data/raw/cpcb/stations.csv 
+      --config-st config/stations.csv --mode all --city Chennai --start 
+      2015-01-01 --end 2020-12-31 --output data/interim/pollution.parquet
+    deps:
+    - path: config/stations.csv
+      hash: md5
+      md5: d96dbca851b52b14496e585a34c1515d
+      size: 7155
+    - path: data/raw/cpcb/station_hour.csv
+      hash: md5
+      md5: bac5800cb86bdab9459334cf8cfa748f
+      size: 219675434
+    - path: data/raw/cpcb/stations.csv
+      hash: md5
+      md5: 5567840d30fee1770507b539a2cd1fdb
+      size: 14467
+    - path: scripts/prepare_pollution.py
+      hash: md5
+      md5: e8e803cfaac6d6a48d463b72e3dd299a
+      size: 3066
+    params:
+      params.yaml:
+        city: Chennai
+        end_date: '2020-12-31'
+        mode: all
+        start_date: '2015-01-01'
+    outs:
+    - path: data/interim/pollution.parquet
+      hash: md5
+      md5: 4e02e274f44de348448c5f6cd70ee268
+      size: 44567459
+  fetch_weather:
+    cmd: python scripts/fetch_weather.py --stations config/stations.csv --config
+      config/weather_vars.yaml --start 2015-01-01 --end 2020-12-31 --raw-dir 
+      data/raw/openmeteo --output data/interim/weather.parquet
+    deps:
+    - path: config/stations.csv
+      hash: md5
+      md5: d96dbca851b52b14496e585a34c1515d
+      size: 7155
+    - path: config/weather_vars.yaml
+      hash: md5
+      md5: 743fb2ea7df669907fad0d928b57efc8
+      size: 167
+    - path: scripts/fetch_weather.py
+      hash: md5
+      md5: b0bd8465b5d0f1eabb202f061f796947
+      size: 3862
+    params:
+      params.yaml:
+        end_date: '2020-12-31'
+        start_date: '2015-01-01'
+    outs:
+    - path: data/interim/weather.parquet
+      hash: md5
+      md5: 34524e075ffd5b391334a9a17c8e3f64
+      size: 50165557
+    - path: data/raw/openmeteo
+      hash: md5
+      md5: f84f2aaa18a32e374d98b96f837d857e.dir
+      size: 87593217
+      nfiles: 33
+  merge:
+    cmd: python scripts/merge.py --pollution data/interim/pollution.parquet 
+      --weather data/interim/weather.parquet --output 
+      data/processed/training_data.parquet
+    deps:
+    - path: data/interim/pollution.parquet
+      hash: md5
+      md5: 4e02e274f44de348448c5f6cd70ee268
+      size: 44567459
+    - path: data/interim/weather.parquet
+      hash: md5
+      md5: 34524e075ffd5b391334a9a17c8e3f64
+      size: 50165557
+    - path: scripts/merge.py
+      hash: md5
+      md5: 3f06748245004f5f61abb667911238cb
+      size: 788
+    outs:
+    - path: data/processed/training_data.parquet
+      hash: md5
+      md5: d8460fd930d7c55cc2c3a924b7d46c32
+      size: 54017453
+  validate:
+    cmd: python scripts/validate.py --input data/processed/training_data.parquet
+    deps:
+    - path: data/processed/training_data.parquet
+      hash: md5
+      md5: d8460fd930d7c55cc2c3a924b7d46c32
+      size: 54017453
+    - path: scripts/validate.py
+      hash: md5
+      md5: 0aa9b0a7b8b7085e92c4b61ac307746f
+      size: 1034
+  preprocess:
+    cmd: python scripts/preprocess.py --input 
+      data/processed/training_data.parquet --output 
+      data/processed/features.parquet --null-threshold 0.8
+    deps:
+    - path: data/processed/training_data.parquet
+      hash: md5
+      md5: d8460fd930d7c55cc2c3a924b7d46c32
+      size: 54017453
+    - path: scripts/preprocess.py
+      hash: md5
+      md5: e22fe60bff6562826cd40447dbcf674c
+      size: 5806
+    params:
+      params.yaml:
+        null_threshold: 0.8
+    outs:
+    - path: data/processed/city_label_encoder.pkl
+      hash: md5
+      md5: 9441b35a07892575b4541f859189d71e
+      size: 523
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 23642500eeec461bc39a2f3a3e3fd62b
+      size: 2081292863
