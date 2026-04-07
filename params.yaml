@@ -1,0 +1,10 @@
+# ── Pipeline control ──────────────────────────────────────────
+mode: all             # all | single
+city: Chennai         # ignored when mode=all
+
+# ── Date range ────────────────────────────────────────────────
+start_date: "2015-01-01"
+end_date:   "2020-12-31"
+
+# ── Preprocessing ─────────────────────────────────────────────
+null_threshold: 0.8

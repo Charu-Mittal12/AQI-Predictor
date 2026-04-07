@@ -8,5 +8,4 @@ data/processed/
 .dvc/cache/
 .dvc/tmp/
 *.log
-logs/
 models/
