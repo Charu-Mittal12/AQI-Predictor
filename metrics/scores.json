@@ -1,0 +1,14 @@
+{
+  "model": "lgbm",
+  "val_mae": 27.5437,
+  "val_rmse": 67.068,
+  "val_r2": 0.7938,
+  "val_mae_t1": 6.6718,
+  "val_rmse_t1": 24.9328,
+  "val_mae_t6": 19.5015,
+  "val_rmse_t6": 53.2582,
+  "val_mae_t12": 29.3116,
+  "val_rmse_t12": 70.8073,
+  "val_mae_t24": 40.179,
+  "val_rmse_t24": 81.8002
+}

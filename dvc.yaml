@@ -1,5 +1,4 @@
 stages:
-
   setup_config:
     cmd: python scripts/setup_config.py
       --kaggle-st data/raw/cpcb/stations.csv
@@ -9,12 +8,11 @@ stages:
     deps:
       - scripts/setup_config.py
       - data/raw/cpcb/stations.csv
+    params:
+      - mode
+      - city
     outs:
       - config/stations.csv
-    params:
-      - params.yaml:
-          - mode
-          - city
 
   prepare_pollution:
     cmd: python scripts/prepare_pollution.py
@@ -23,42 +21,40 @@ stages:
       --config-st config/stations.csv
       --mode ${mode}
       --city ${city}
-      --start ${start_date}
-      --end ${end_date}
+      --start ${data.start_date}
+      --end ${data.end_date}
       --output data/interim/pollution.parquet
     deps:
       - scripts/prepare_pollution.py
       - data/raw/cpcb/station_hour.csv
       - data/raw/cpcb/stations.csv
       - config/stations.csv
+    params:
+      - mode
+      - city
+      - data.start_date
+      - data.end_date
     outs:
       - data/interim/pollution.parquet
-    params:
-      - params.yaml:
-          - mode
-          - city
-          - start_date
-          - end_date
 
   fetch_weather:
     cmd: python scripts/fetch_weather.py
       --stations config/stations.csv
       --config config/weather_vars.yaml
-      --start ${start_date}
-      --end ${end_date}
+      --start ${data.start_date}
+      --end ${data.end_date}
       --raw-dir data/raw/openmeteo
       --output data/interim/weather.parquet
     deps:
       - scripts/fetch_weather.py
       - config/stations.csv
       - config/weather_vars.yaml
+    params:
+      - data.start_date
+      - data.end_date
     outs:
       - data/interim/weather.parquet
       - data/raw/openmeteo
-    params:
-      - params.yaml:
-          - start_date
-          - end_date
 
   merge:
     cmd: python scripts/merge.py
@@ -83,13 +79,47 @@ stages:
     cmd: python scripts/preprocess.py
       --input data/processed/training_data.parquet
       --output data/processed/features.parquet
-      --null-threshold ${null_threshold}
+      --null-threshold ${preprocess.null_threshold}
     deps:
       - scripts/preprocess.py
       - data/processed/training_data.parquet
+    params:
+      - preprocess.null_threshold
     outs:
       - data/processed/features.parquet
       - data/processed/city_label_encoder.pkl
+
+  train:
+    cmd: python scripts/train.py
+    deps:
+      - scripts/train.py
+      - data/processed/features.parquet
     params:
-      - params.yaml:
-          - null_threshold
+      - training
+      - lgbm
+      - xgboost
+    outs:
+      - models/:
+          cache: true
+          push: true
+    metrics:
+      - metrics/scores.json:
+          cache: false
+
+  evaluate:
+    cmd: python scripts/evaluate.py
+    deps:
+      - scripts/evaluate.py
+      - models/
+      - data/processed/features.parquet
+    params:
+      - training
+    metrics:
+      - metrics/eval_scores.json:
+          cache: false
+
+plots:
+  - metrics/eval_scores.json:
+      template: bar_horizontal
+      x: value
+      y: metric

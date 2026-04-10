@@ -1,10 +1,57 @@
-# ── Pipeline control ──────────────────────────────────────────
-mode: all             # all | single
-city: Chennai         # ignored when mode=all
+# Pipeline control
+mode: all
+city: Chennai
 
-# ── Date range ────────────────────────────────────────────────
-start_date: "2015-01-01"
-end_date:   "2020-12-31"
+# Date range
+data:
+  start_date: "2015-01-01"
+  end_date:   "2020-12-31"
 
-# ── Preprocessing ─────────────────────────────────────────────
-null_threshold: 0.8
+# Preprocessing
+preprocess:
+  null_threshold: 0.8
+
+# Training
+training:
+  model: lgbm
+  forecast_horizon: 24
+  sample_frac: 1.0
+
+# Model params
+lgbm:
+  n_estimators: 200
+  learning_rate: 0.05
+  num_leaves: 31
+  max_depth: 6
+  min_child_samples: 50
+
+xgboost:
+  n_estimators: 500
+  learning_rate: 0.05
+  max_depth: 6
+  subsample: 0.8
+
+prophet:
+  seasonality_mode: multiplicative
+  yearly_seasonality: true
+  weekly_seasonality: true
+  daily_seasonality: true
+
+lstm:
+  hidden_size: 128
+  num_layers: 2
+  dropout: 0.2
+  epochs: 50
+  batch_size: 512
+  learning_rate: 0.001
+  sequence_length: 24
+
+transformer:
+  d_model: 128
+  nhead: 8
+  num_layers: 3
+  dropout: 0.1
+  epochs: 50
+  batch_size: 512
+  learning_rate: 0.0001
+  sequence_length: 24

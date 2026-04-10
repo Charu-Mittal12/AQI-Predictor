@@ -46,9 +46,9 @@ stages:
     params:
       params.yaml:
         city: Chennai
-        end_date: '2020-12-31'
+        data.end_date: '2020-12-31'
+        data.start_date: '2015-01-01'
         mode: all
-        start_date: '2015-01-01'
     outs:
     - path: data/interim/pollution.parquet
       hash: md5
@@ -73,8 +73,8 @@ stages:
       size: 3862
     params:
       params.yaml:
-        end_date: '2020-12-31'
-        start_date: '2015-01-01'
+        data.end_date: '2020-12-31'
+        data.start_date: '2015-01-01'
     outs:
     - path: data/interim/weather.parquet
       hash: md5
@@ -133,7 +133,7 @@ stages:
       size: 5806
     params:
       params.yaml:
-        null_threshold: 0.8
+        preprocess.null_threshold: 0.8
     outs:
     - path: data/processed/city_label_encoder.pkl
       hash: md5
@@ -143,3 +143,68 @@ stages:
       hash: md5
       md5: 23642500eeec461bc39a2f3a3e3fd62b
       size: 2081292863
+  train:
+    cmd: python scripts/train.py
+    deps:
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 23642500eeec461bc39a2f3a3e3fd62b
+      size: 2081292863
+    - path: scripts/train.py
+      hash: md5
+      md5: f7336a8a226f6af38c7e148e94224d24
+      size: 10318
+    params:
+      params.yaml:
+        lgbm:
+          n_estimators: 200
+          learning_rate: 0.05
+          num_leaves: 31
+          max_depth: 6
+          min_child_samples: 50
+        training:
+          model: lgbm
+          forecast_horizon: 24
+          sample_frac: 1.0
+        xgboost:
+          n_estimators: 500
+          learning_rate: 0.05
+          max_depth: 6
+          subsample: 0.8
+    outs:
+    - path: metrics/scores.json
+      hash: md5
+      md5: 30180e01ab73ae057b913b6925c4490f
+      size: 291
+    - path: models/
+      hash: md5
+      md5: f9616265b35ce2a4942866b4e2507286.dir
+      size: 29055454
+      nfiles: 2
+  evaluate:
+    cmd: python scripts/evaluate.py
+    deps:
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 23642500eeec461bc39a2f3a3e3fd62b
+      size: 2081292863
+    - path: models/
+      hash: md5
+      md5: f9616265b35ce2a4942866b4e2507286.dir
+      size: 29055454
+      nfiles: 2
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 66b8f9909652d47c7c5ab8613512d407
+      size: 5549
+    params:
+      params.yaml:
+        training:
+          model: lgbm
+          forecast_horizon: 24
+          sample_frac: 1.0
+    outs:
+    - path: metrics/eval_scores.json
+      hash: md5
+      md5: cb59912548f397cd05500254cc6dae09
+      size: 400

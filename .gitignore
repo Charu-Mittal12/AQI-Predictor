@@ -18,3 +18,8 @@ data/processed/*
 .dvc/tmp/
 *.log
 models/
+archive/city_day.csv
+archive/city_hour.csv
+archive/station_day.csvmlruns/
+logs/
+/models
