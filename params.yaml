@@ -1,42 +1,44 @@
-# Pipeline control
 mode: all
 city: Chennai
-
-# Date range
 data:
-  start_date: "2015-01-01"
-  end_date:   "2020-12-31"
-
-# Preprocessing
+  start_date: '2015-01-01'
+  end_date: '2020-12-31'
 preprocess:
   null_threshold: 0.8
-
-# Training
 training:
   model: lgbm
   forecast_horizon: 24
   sample_frac: 1.0
-
-# Model params
 lgbm:
-  n_estimators: 200
-  learning_rate: 0.05
-  num_leaves: 31
+  n_estimators: 175
+  learning_rate: 0.17254716573280354
+  num_leaves: 79
   max_depth: 6
-  min_child_samples: 50
-
+  min_child_samples: 24
+  optuna:
+    enabled: false
+    n_trials: 5
+    random_seed: 42
+    n_estimators_min: 100
+    n_estimators_max: 300
+    learning_rate_min: 0.01
+    learning_rate_max: 0.2
+    num_leaves_min: 20
+    num_leaves_max: 100
+    max_depth_min: 3
+    max_depth_max: 8
+    min_child_samples_min: 10
+    min_child_samples_max: 100
 xgboost:
   n_estimators: 500
   learning_rate: 0.05
   max_depth: 6
   subsample: 0.8
-
 prophet:
   seasonality_mode: multiplicative
   yearly_seasonality: true
   weekly_seasonality: true
   daily_seasonality: true
-
 lstm:
   hidden_size: 128
   num_layers: 2
@@ -45,7 +47,6 @@ lstm:
   batch_size: 512
   learning_rate: 0.001
   sequence_length: 24
-
 transformer:
   d_model: 128
   nhead: 8
