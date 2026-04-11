@@ -6,7 +6,7 @@ data:
 preprocess:
   null_threshold: 0.8
 training:
-  model: lgbm
+  model: xgboost
   forecast_horizon: 24
   sample_frac: 1.0
 lgbm:

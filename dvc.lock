@@ -177,7 +177,7 @@ stages:
             min_child_samples_min: 10
             min_child_samples_max: 100
         training:
-          model: lgbm
+          model: xgboost
           forecast_horizon: 24
           sample_frac: 1.0
         xgboost:
@@ -188,12 +188,12 @@ stages:
     outs:
     - path: metrics/scores.json
       hash: md5
-      md5: 3a1085a15a074c588dc387d3271462d3
-      size: 293
+      md5: 21708fbf51fd0dd1b8d3bc929b380dae
+      size: 294
     - path: models/
       hash: md5
-      md5: 90f03d2bf483a8dc9f5325084e984501.dir
-      size: 37286974
+      md5: 879a0c6e5feb27772b4d89d9a623a747.dir
+      size: 106222142
       nfiles: 2
   evaluate:
     cmd: python scripts/evaluate.py
