@@ -204,8 +204,8 @@ stages:
       size: 2081292863
     - path: models/
       hash: md5
-      md5: f9616265b35ce2a4942866b4e2507286.dir
-      size: 29055454
+      md5: 879a0c6e5feb27772b4d89d9a623a747.dir
+      size: 106222142
       nfiles: 2
     - path: scripts/evaluate.py
       hash: md5
@@ -214,11 +214,11 @@ stages:
     params:
       params.yaml:
         training:
-          model: lgbm
+          model: xgboost
           forecast_horizon: 24
           sample_frac: 1.0
     outs:
     - path: metrics/eval_scores.json
       hash: md5
-      md5: cb59912548f397cd05500254cc6dae09
-      size: 400
+      md5: ece92911a0a2f9a2976dad9fd228fa63
+      size: 404
