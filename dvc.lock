@@ -152,8 +152,8 @@ stages:
       size: 2081292863
     - path: scripts/train.py
       hash: md5
-      md5: 46b5d807977e4c20a4eb4462eff7f7ae
-      size: 15549
+      md5: 5c750bd4af18c90725a0b166b82541a2
+      size: 16340
     params:
       params.yaml:
         lgbm:
@@ -181,19 +181,31 @@ stages:
           forecast_horizon: 24
           sample_frac: 1.0
         xgboost:
-          n_estimators: 500
-          learning_rate: 0.05
-          max_depth: 6
-          subsample: 0.8
+          n_estimators: 161
+          learning_rate: 0.048164145309070844
+          max_depth: 5
+          subsample: 0.7164916560792167
+          optuna:
+            enabled: false
+            n_trials: 10
+            random_seed: 42
+            n_estimators_min: 100
+            n_estimators_max: 300
+            learning_rate_min: 0.01
+            learning_rate_max: 0.2
+            max_depth_min: 3
+            max_depth_max: 8
+            subsample_min: 0.6
+            subsample_max: 1.0
     outs:
     - path: metrics/scores.json
       hash: md5
-      md5: 21708fbf51fd0dd1b8d3bc929b380dae
-      size: 294
+      md5: 88f7828cb999a0800812678485547419
+      size: 296
     - path: models/
       hash: md5
-      md5: 879a0c6e5feb27772b4d89d9a623a747.dir
-      size: 106222142
+      md5: 637a018b3eae639d49d6d5171cb30ce0.dir
+      size: 21091578
       nfiles: 2
   evaluate:
     cmd: python scripts/evaluate.py

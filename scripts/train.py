@@ -209,57 +209,78 @@ def save_artifacts(model, model_name: str, metrics: dict):
     return model_path, metrics_path
 
 # Optuna Hyperparameter Search
-def run_optuna(X_train, y_train, X_val, y_val, optuna_cfg: dict) -> dict:
-    """
-    Runs Optuna TPE search over the LGBM search space defined in params.yaml.
-    Every trial is logged as a nested MLflow run for full visibility.
-    Returns best_params dict (only model constructor keys).
-    """
-    n_trials = int(optuna_cfg.get("n_trials", 50))
-    seed     = int(optuna_cfg.get("random_seed", 42))
+def run_optuna(X_train, y_train, X_val, y_val,
+               optuna_cfg: dict, model_name: str) -> dict: 
+    n_trials = int(optuna_cfg.get("n_trials", 10))     
+    seed     = int(optuna_cfg.get("random_seed", 42)) 
 
     def objective(trial):
-        params = {
-            "n_estimators": trial.suggest_int(
-                "n_estimators",
-                int(optuna_cfg["n_estimators_min"]),
-                int(optuna_cfg["n_estimators_max"])
-            ),
-            "learning_rate": trial.suggest_float(
-                "learning_rate",
-                float(optuna_cfg["learning_rate_min"]),
-                float(optuna_cfg["learning_rate_max"]),
-                log=True
-            ),
-            "num_leaves": trial.suggest_int(
-                "num_leaves",
-                int(optuna_cfg["num_leaves_min"]),
-                int(optuna_cfg["num_leaves_max"])
-            ),
-            "max_depth": trial.suggest_int(
-                "max_depth",
-                int(optuna_cfg["max_depth_min"]),
-                int(optuna_cfg["max_depth_max"])
-            ),
-            "min_child_samples": trial.suggest_int(
-                "min_child_samples",
-                int(optuna_cfg["min_child_samples_min"]),
-                int(optuna_cfg["min_child_samples_max"])
-            ),
-        }
 
-        model = MultiOutputRegressor(
-            lgb.LGBMRegressor(**params, verbose=-1, n_jobs=2), n_jobs=1
-        )
+        if model_name == "lgbm":
+            params = {
+                "n_estimators": trial.suggest_int(
+                    "n_estimators",
+                    int(optuna_cfg["n_estimators_min"]),
+                    int(optuna_cfg["n_estimators_max"])
+                ),
+                "learning_rate": trial.suggest_float(
+                    "learning_rate",
+                    float(optuna_cfg["learning_rate_min"]),
+                    float(optuna_cfg["learning_rate_max"]),
+                    log=True
+                ),
+                "num_leaves": trial.suggest_int(
+                    "num_leaves",
+                    int(optuna_cfg["num_leaves_min"]),
+                    int(optuna_cfg["num_leaves_max"])
+                ),
+                "max_depth": trial.suggest_int(
+                    "max_depth",
+                    int(optuna_cfg["max_depth_min"]),
+                    int(optuna_cfg["max_depth_max"])
+                ),
+                "min_child_samples": trial.suggest_int(
+                    "min_child_samples",
+                    int(optuna_cfg["min_child_samples_min"]),
+                    int(optuna_cfg["min_child_samples_max"])
+                ),
+            }
+
+        elif model_name == "xgboost":
+            params = {
+                "n_estimators": trial.suggest_int(
+                    "n_estimators",
+                    int(optuna_cfg["n_estimators_min"]),
+                    int(optuna_cfg["n_estimators_max"])
+                ),
+                "learning_rate": trial.suggest_float(
+                    "learning_rate",
+                    float(optuna_cfg["learning_rate_min"]),
+                    float(optuna_cfg["learning_rate_max"]),
+                    log=True
+                ),
+                "max_depth": trial.suggest_int(
+                    "max_depth",
+                    int(optuna_cfg["max_depth_min"]),
+                    int(optuna_cfg["max_depth_max"])
+                ),
+                "subsample": trial.suggest_float(
+                    "subsample",
+                    float(optuna_cfg["subsample_min"]),
+                    float(optuna_cfg["subsample_max"])
+                ),
+            }
+
+        model = get_model(model_name, params)
         model.fit(X_train, y_train)
         r2 = float(r2_score(y_val, model.predict(X_val)))
 
-        # Each trial → nested MLflow run (visible in MLflow UI under parent run)
         with mlflow.start_run(run_name=f"trial_{trial.number:03d}", nested=True):
             mlflow.log_params(params)
             mlflow.log_metric("val_r2", r2)
 
         return r2
+
 
     sampler = optuna.samplers.TPESampler(seed=seed)
     study   = optuna.create_study(direction="maximize", sampler=sampler)
@@ -328,7 +349,7 @@ def main():
             mlflow.log_param("optuna_n_trials", optuna_cfg.get("n_trials", 50))
             mlflow.log_param("optuna_seed",     optuna_cfg.get("random_seed", 42))
 
-            best_params = run_optuna(X_train, y_train, X_val, y_val, optuna_cfg)
+            best_params = run_optuna(X_train, y_train, X_val, y_val, optuna_cfg, model_name)
 
             # Merge: best_params overrides the manual values in model_params
             final_params = {**model_params, **best_params}
