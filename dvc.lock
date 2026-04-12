@@ -177,14 +177,14 @@ stages:
             min_child_samples_min: 10
             min_child_samples_max: 100
         training:
-          model: lgbm
+          model: xgboost
           forecast_horizon: 24
           sample_frac: 1.0
         xgboost:
-          n_estimators: 161
-          learning_rate: 0.048164145309070844
-          max_depth: 5
-          subsample: 0.7164916560792167
+          n_estimators: 500
+          learning_rate: 0.05
+          max_depth: 6
+          subsample: 0.8
           optuna:
             enabled: false
             n_trials: 10
@@ -200,12 +200,12 @@ stages:
     outs:
     - path: metrics/scores.json
       hash: md5
-      md5: ab0bae5aafdd35851e738f28d6b5bd99
-      size: 292
+      md5: 0ad4cafae515dc4a73be357864d26e65
+      size: 293
     - path: models/
       hash: md5
-      md5: 35db345cad6a0d3ee3a2a360a696c467.dir
-      size: 28935758
+      md5: ffc7f8f8a6c9c63e674a1c9d387eaccd.dir
+      size: 105111208
       nfiles: 2
   evaluate:
     cmd: python scripts/evaluate.py
@@ -216,8 +216,8 @@ stages:
       size: 2619594971
     - path: models/
       hash: md5
-      md5: 35db345cad6a0d3ee3a2a360a696c467.dir
-      size: 28935758
+      md5: ffc7f8f8a6c9c63e674a1c9d387eaccd.dir
+      size: 105111208
       nfiles: 2
     - path: scripts/evaluate.py
       hash: md5
@@ -226,11 +226,11 @@ stages:
     params:
       params.yaml:
         training:
-          model: lgbm
+          model: xgboost
           forecast_horizon: 24
           sample_frac: 1.0
     outs:
     - path: metrics/eval_scores.json
       hash: md5
-      md5: d38c9036244b32bea0ab89150710567d
-      size: 400
+      md5: 71d4524b5cb8cd2c2ce4e2e5dd335668
+      size: 403
