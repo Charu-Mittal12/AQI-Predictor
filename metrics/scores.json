@@ -1,14 +1,14 @@
 {
-  "model": "xgboost",
-  "val_mae": 27.8274,
-  "val_rmse": 67.1443,
-  "val_r2": 0.7933,
-  "val_mae_t1": 7.1992,
-  "val_rmse_t1": 26.1672,
-  "val_mae_t6": 19.8825,
-  "val_rmse_t6": 53.4106,
-  "val_mae_t12": 29.5206,
-  "val_rmse_t12": 71.1563,
-  "val_mae_t24": 40.2791,
-  "val_rmse_t24": 81.9675
+  "model": "lgbm",
+  "val_mae": 26.2521,
+  "val_rmse": 65.3273,
+  "val_r2": 0.8043,
+  "val_mae_t1": 4.2256,
+  "val_rmse_t1": 20.505,
+  "val_mae_t6": 17.6658,
+  "val_rmse_t6": 50.5779,
+  "val_mae_t12": 28.1953,
+  "val_rmse_t12": 69.1905,
+  "val_mae_t24": 39.7887,
+  "val_rmse_t24": 80.9272
 }

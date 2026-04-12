@@ -129,8 +129,8 @@ stages:
       size: 54017453
     - path: scripts/preprocess.py
       hash: md5
-      md5: e22fe60bff6562826cd40447dbcf674c
-      size: 5806
+      md5: ff8caf435869aa08cbe16c2ada96d19f
+      size: 7413
     params:
       params.yaml:
         preprocess.null_threshold: 0.8
@@ -141,15 +141,15 @@ stages:
       size: 523
     - path: data/processed/features.parquet
       hash: md5
-      md5: 23642500eeec461bc39a2f3a3e3fd62b
-      size: 2081292863
+      md5: f0e12c1789745d1c4df9a6ef82ad1669
+      size: 2619594971
   train:
     cmd: python scripts/train.py
     deps:
     - path: data/processed/features.parquet
       hash: md5
-      md5: 23642500eeec461bc39a2f3a3e3fd62b
-      size: 2081292863
+      md5: f0e12c1789745d1c4df9a6ef82ad1669
+      size: 2619594971
     - path: scripts/train.py
       hash: md5
       md5: 5c750bd4af18c90725a0b166b82541a2
@@ -157,11 +157,11 @@ stages:
     params:
       params.yaml:
         lgbm:
-          n_estimators: 175
-          learning_rate: 0.17254716573280354
-          num_leaves: 79
+          n_estimators: 200
+          learning_rate: 0.05
+          num_leaves: 31
           max_depth: 6
-          min_child_samples: 24
+          min_child_samples: 50
           optuna:
             enabled: false
             n_trials: 5
@@ -177,7 +177,7 @@ stages:
             min_child_samples_min: 10
             min_child_samples_max: 100
         training:
-          model: xgboost
+          model: lgbm
           forecast_horizon: 24
           sample_frac: 1.0
         xgboost:
@@ -200,24 +200,24 @@ stages:
     outs:
     - path: metrics/scores.json
       hash: md5
-      md5: 88f7828cb999a0800812678485547419
-      size: 296
+      md5: ab0bae5aafdd35851e738f28d6b5bd99
+      size: 292
     - path: models/
       hash: md5
-      md5: 637a018b3eae639d49d6d5171cb30ce0.dir
-      size: 21091578
+      md5: 35db345cad6a0d3ee3a2a360a696c467.dir
+      size: 28935758
       nfiles: 2
   evaluate:
     cmd: python scripts/evaluate.py
     deps:
     - path: data/processed/features.parquet
       hash: md5
-      md5: 23642500eeec461bc39a2f3a3e3fd62b
-      size: 2081292863
+      md5: f0e12c1789745d1c4df9a6ef82ad1669
+      size: 2619594971
     - path: models/
       hash: md5
-      md5: 879a0c6e5feb27772b4d89d9a623a747.dir
-      size: 106222142
+      md5: 35db345cad6a0d3ee3a2a360a696c467.dir
+      size: 28935758
       nfiles: 2
     - path: scripts/evaluate.py
       hash: md5
@@ -226,11 +226,11 @@ stages:
     params:
       params.yaml:
         training:
-          model: xgboost
+          model: lgbm
           forecast_horizon: 24
           sample_frac: 1.0
     outs:
     - path: metrics/eval_scores.json
       hash: md5
-      md5: ece92911a0a2f9a2976dad9fd228fa63
-      size: 404
+      md5: d38c9036244b32bea0ab89150710567d
+      size: 400

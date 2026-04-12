@@ -6,15 +6,15 @@ data:
 preprocess:
   null_threshold: 0.8
 training:
-  model: xgboost
+  model: lgbm
   forecast_horizon: 24
   sample_frac: 1.0
 lgbm:
-  n_estimators: 175
-  learning_rate: 0.17254716573280354
-  num_leaves: 79
+  n_estimators:  200
+  learning_rate: 0.05
+  num_leaves: 31
   max_depth: 6
-  min_child_samples: 24
+  min_child_samples: 50
   optuna:
     enabled: false
     n_trials: 5
