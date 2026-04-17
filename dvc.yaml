@@ -14,6 +14,7 @@ stages:
     outs:
       - config/stations.csv
 
+
   prepare_pollution:
     cmd: python scripts/prepare_pollution.py
       --input data/raw/cpcb/station_hour.csv
@@ -37,6 +38,7 @@ stages:
     outs:
       - data/interim/pollution.parquet
 
+
   fetch_weather:
     cmd: python scripts/fetch_weather.py
       --stations config/stations.csv
@@ -56,6 +58,7 @@ stages:
       - data/interim/weather.parquet
       - data/raw/openmeteo
 
+
   merge:
     cmd: python scripts/merge.py
       --pollution data/interim/pollution.parquet
@@ -68,12 +71,14 @@ stages:
     outs:
       - data/processed/training_data.parquet
 
+
   validate:
     cmd: python scripts/validate.py
       --input data/processed/training_data.parquet
     deps:
       - scripts/validate.py
       - data/processed/training_data.parquet
+
 
   preprocess:
     cmd: python scripts/preprocess.py
@@ -88,6 +93,27 @@ stages:
     outs:
       - data/processed/features.parquet
       - data/processed/city_label_encoder.pkl
+
+
+  preprocess_lstm:
+    cmd: python scripts/preprocess_lstm.py
+      --input data/processed/training_data.parquet
+      --output data/processed/features_lstm.parquet
+      --null-threshold ${preprocess.null_threshold}
+      --seq-len ${lstm.seq_len}
+    deps:
+      - scripts/preprocess_lstm.py
+      - data/processed/training_data.parquet
+    params:
+      - preprocess.null_threshold
+      - lstm.seq_len
+    outs:
+      - data/processed/features_lstm.parquet
+      - data/processed/lstm_scaler.pkl
+      - data/processed/lstm_meta.pkl
+      - data/processed/city_label_encoder_lstm.pkl
+
+
 
   train:
     cmd: python scripts/train.py
@@ -106,6 +132,20 @@ stages:
       - metrics/scores.json:
           cache: false
 
+
+  train_lstm:
+    cmd: python scripts/train_lstm.py
+    deps:
+      - scripts/train_lstm.py
+      - data/processed/features_lstm.parquet
+      - data/processed/lstm_scaler.pkl
+    params:
+      - lstm
+    metrics:
+      - metrics/lstm_scores.json:
+          cache: false
+
+
   evaluate:
     cmd: python scripts/evaluate.py
     deps:
@@ -118,8 +158,27 @@ stages:
       - metrics/eval_scores.json:
           cache: false
 
+
+  evaluate_lstm:
+    cmd: python scripts/evaluate_lstm.py
+    deps:
+      - scripts/evaluate_lstm.py
+      - models/lstm_model.pt
+      - data/processed/features_lstm.parquet
+      - data/processed/lstm_scaler.pkl
+    params:
+      - lstm
+    metrics:
+      - metrics/lstm_eval_scores.json:
+          cache: false
+
+
 plots:
   - metrics/eval_scores.json:
+      template: bar_horizontal
+      x: value
+      y: metric
+  - metrics/lstm_eval_scores.json:
       template: bar_horizontal
       x: value
       y: metric
