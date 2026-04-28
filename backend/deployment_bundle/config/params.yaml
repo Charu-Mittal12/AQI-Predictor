@@ -1,0 +1,70 @@
+mode: all
+city: Chennai
+data:
+  start_date: '2015-01-01'
+  end_date: '2020-12-31'
+preprocess:
+  null_threshold: 0.8
+training:
+  model: lgbm
+  forecast_horizon: 24
+  sample_frac: 1.0
+lgbm:
+  n_estimators:  200
+  learning_rate: 0.05
+  num_leaves: 31
+  max_depth: 6
+  min_child_samples: 50
+  optuna:
+    enabled: false
+    n_trials: 5
+    random_seed: 42
+    n_estimators_min: 100
+    n_estimators_max: 300
+    learning_rate_min: 0.01
+    learning_rate_max: 0.2
+    num_leaves_min: 20
+    num_leaves_max: 100
+    max_depth_min: 3
+    max_depth_max: 8
+    min_child_samples_min: 10
+    min_child_samples_max: 100
+xgboost:
+  n_estimators: 161
+  learning_rate: 0.048164145309070844
+  max_depth: 5
+  subsample: 0.7164916560792167
+  optuna:
+    enabled: false
+    n_trials: 10
+    random_seed: 42
+    n_estimators_min: 100
+    n_estimators_max: 300
+    learning_rate_min: 0.01
+    learning_rate_max: 0.2
+    max_depth_min: 3
+    max_depth_max: 8
+    subsample_min: 0.6
+    subsample_max: 1.0
+prophet:
+  seasonality_mode: multiplicative
+  yearly_seasonality: true
+  weekly_seasonality: true
+  daily_seasonality: true
+lstm:
+  hidden_size: 128
+  num_layers: 2
+  dropout: 0.2
+  epochs: 50
+  batch_size: 512
+  learning_rate: 0.001
+  sequence_length: 24
+transformer:
+  d_model: 128
+  nhead: 8
+  num_layers: 3
+  dropout: 0.1
+  epochs: 50
+  batch_size: 512
+  learning_rate: 0.0001
+  sequence_length: 24

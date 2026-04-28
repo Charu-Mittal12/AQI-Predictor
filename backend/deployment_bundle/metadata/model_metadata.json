@@ -1,0 +1,14 @@
+{
+  "model_name": "lgbm_model.pkl",
+  "model_family": "LightGBM",
+  "selection_status": "chosen_for_serving",
+  "git_tag": "lgbm-exp3",
+  "git_commit": "0727a7ad8ef3fa098e45672630719d954a40f80a",
+  "mlflow_run_id": "9e5a8dd2983641a7ac8b8b71b0eebf8e",
+  "mlflow_run_name": "lgbm_20260412_010953",
+  "primary_metric": "val_mae",
+  "primary_metric_value": 26.2521,
+  "forecast_horizon": 24,
+  "selected_at": "2026-04-18T19:45:00+05:30",
+  "selection_reason": "Chosen as the final deployment candidate because it is reproducible, available locally, and suitable for backend serving."
+}
