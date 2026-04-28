@@ -12,7 +12,7 @@ AQI Predictor is an end-to-end MLOps project that:
 - Detects **data drift** using PSI, KS-test, and Z-score
 - Serves **24-hour AQI forecasts** through a FastAPI backend
 - Displays predictions, pollutant levels, and advisories in a Streamlit dashboard
-- Monitors the system with **Prometheus** and **Grafana** [file:3]
+- Monitors the system with **Prometheus** and **Grafana** 
 
 ---
 
@@ -22,18 +22,18 @@ AQI Predictor is an end-to-end MLOps project that:
 - Delhi
 - Mumbai
 - Kolkata
-- Ahmedabad [file:3]
+- Ahmedabad 
 
 ---
 
 ## Key Features
 
-- **24-hour AQI prediction** for selected city and station [file:3]
-- **Hourly ingestion pipeline** using Apache Airflow [file:3]
-- **SQLite live buffer** for recent sensor and prediction data [file:3]
-- **MLflow model serving** for LightGBM inference on port 5001 [file:3]
-- **Drift monitoring** written to `driftresults` and exposed via Prometheus metrics [file:3]
-- **Health, readiness, metrics, and admin APIs** for operations support [file:3]
+- **24-hour AQI prediction** for selected city and station 
+- **Hourly ingestion pipeline** using Apache Airflow 
+- **SQLite live buffer** for recent sensor and prediction data 
+- **MLflow model serving** for LightGBM inference on port 5001 
+- **Drift monitoring** written to `driftresults` and exposed via Prometheus metrics 
+- **Health, readiness, metrics, and admin APIs** for operations support 
 
 ---
 
@@ -56,7 +56,7 @@ OpenAQ v3 API + Open-Meteo
           └──► Prometheus ───► Grafana
 ```
 
-This system uses Airflow for scheduled ingestion and cleanup, FastAPI for prediction APIs, MLflow for model serving, and Streamlit for user interaction. Prometheus scrapes metrics from the backend, while Grafana visualizes system and drift health. [file:3]
+This system uses Airflow for scheduled ingestion and cleanup, FastAPI for prediction APIs, MLflow for model serving, and Streamlit for user interaction. Prometheus scrapes metrics from the backend, while Grafana visualizes system and drift health. 
 
 ---
 
@@ -90,7 +90,7 @@ AQIPredictor/
 
 ```
 
-The backend contains the FastAPI application, model logic, data services, and monitoring utilities. Airflow DAGs manage ingestion and cleanup, while the frontend provides the Streamlit dashboard. [file:3]
+The backend contains the FastAPI application, model logic, data services, and monitoring utilities. Airflow DAGs manage ingestion and cleanup, while the frontend provides the Streamlit dashboard. 
 
 ---
 
@@ -98,16 +98,16 @@ The backend contains the FastAPI application, model logic, data services, and mo
 
 | Method | Endpoint | Purpose |
 |---|---|---|
-| GET | `/health` | Liveness check [file:3] |
-| GET | `/ready` | MLflow/model readiness check [file:3] |
+| GET | `/health` | Liveness check |
+| GET | `/ready` | MLflow/model readiness check |
 | GET | `/cities` | List supported cities [file:3] |
-| GET | `/predict?city=&location_id=` | 24-hour AQI forecast [file:3] |
-| GET | `/model-info` | Model metadata [file:3] |
-| GET | `/metrics` | Prometheus metrics scrape [file:3] |
-| POST | `/admin/sync` | Trigger ingestion manually [file:3] |
-| POST | `/admin/prune` | Prune old hourly measurements [file:3] |
+| GET | `/predict?city=&location_id=` | 24-hour AQI forecast|
+| GET | `/model-info` | Model metadata|
+| GET | `/metrics` | Prometheus metrics scrape|
+| POST | `/admin/sync` | Trigger ingestion manually |
+| POST | `/admin/prune` | Prune old hourly measurements |
 
-Interactive Swagger docs are available at `http://localhost:8000/docs` when the backend is running. [file:3]
+Interactive Swagger docs are available at `http://localhost:8000/docs` when the backend is running.
 
 ---
 
@@ -115,15 +115,15 @@ Interactive Swagger docs are available at `http://localhost:8000/docs` when the 
 
 | Layer | Technology |
 |---|---|
-| API | FastAPI, Pydantic, Uvicorn [file:3] |
-| Model | LightGBM, scikit-learn [file:3] |
-| Model Serving | MLflow [file:3] |
-| Orchestration | Apache Airflow [file:3] |
-| Database | SQLite [file:3] |
-| Frontend | Streamlit, Plotly [file:3] |
-| Monitoring | Prometheus, Grafana [file:3] |
-| Testing | pytest, FastAPI TestClient [file:3] |
-| Containerization | Docker, Docker Compose [file:3] |
+| API | FastAPI, Pydantic, Uvicorn |
+| Model | LightGBM, scikit-learn  |
+| Model Serving | MLflow  |
+| Orchestration | Apache Airflow |
+| Database | SQLite |
+| Frontend | Streamlit, Plotly |
+| Monitoring | Prometheus, Grafana |
+| Testing | pytest, FastAPI TestClient  |
+| Containerization | Docker, Docker Compose |
 
 ---
 
@@ -142,7 +142,7 @@ cd AQIPredictor
 cp .env.example .env
 ```
 
-Add your OpenAQ API key and any required paths in `.env`. The project reads variables such as `OPENAQ_API_KEY`, `DB_PATH`, `MODEL_NAME`, `MODEL_STAGE`, and `LIVE_HISTORY_HOURS`. [file:3]
+Add your OpenAQ API key and any required paths in `.env`. The project reads variables such as `OPENAQ_API_KEY`, `DB_PATH`, `MODEL_NAME`, `MODEL_STAGE`, and `LIVE_HISTORY_HOURS`. 
 
 ### 3. Start all services
 
@@ -156,7 +156,7 @@ Expected services include:
 - MLflow model server on **5001**
 - Airflow webserver on **8080**
 - Prometheus on **9090**
-- Grafana on **3000** [file:3]
+- Grafana on **3000** 
 
 ### 4. Trigger ingestion
 
@@ -179,7 +179,7 @@ cd backend
 pytest tests/ -v --tb=short
 ```
 
-The test suite covers health endpoints, prediction logic, model info, database operations, advisory logic, and drift detection. Your project contains 47 backend-focused test cases based on the provided test plan and test files. [file:3]
+The test suite covers health endpoints, prediction logic, model info, database operations, advisory logic, and drift detection. Your project contains 47 backend-focused test cases based on the provided test plan and test files.
 
 ---
 
@@ -188,9 +188,9 @@ The test suite covers health endpoints, prediction logic, model info, database o
 Drift detection runs after ingestion in the Airflow DAG and compares recent live data against older live data from the same SQLite source. It uses:
 - **PSI** for distribution shift
 - **KS-test** for statistical significance
-- **Z-score** for mean shift [file:3]
+- **Z-score** for mean shift 
 
-Results are written to the `driftresults` table and exposed through Prometheus metrics using a custom `DriftCollector`. [file:3]
+Results are written to the `driftresults` table and exposed through Prometheus metrics using a custom `DriftCollector`.
 
 ---
 
@@ -203,9 +203,9 @@ Prometheus metrics include:
 - Live fetch rows written
 - Latest DB age
 - Model readiness
-- Drift PSI / drift detected / drifted feature count [file:3]
+- Drift PSI / drift detected / drifted feature count 
 
-Grafana can be used to visualize backend performance, drift signals, and freshness metrics. [file:3]
+Grafana can be used to visualize backend performance, drift signals, and freshness metrics. 
 
 ---
 
