@@ -139,7 +139,7 @@ cd AQIPredictor
 ### 2. Create environment file
 
 ```bash
-cp .env.example .env
+cp .env
 ```
 
 Add your OpenAQ API key and any required paths in `.env`. The project reads variables such as `OPENAQ_API_KEY`, `DB_PATH`, `MODEL_NAME`, `MODEL_STAGE`, and `LIVE_HISTORY_HOURS`. 
