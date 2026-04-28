@@ -16,19 +16,19 @@ AQI Predictor is a production-grade, end-to-end MLOps system that:
 
 ---
 
-## Architecture
+## System Architecture
+<img width="1408" height="768" alt="Architectural_diagram" src="https://github.com/user-attachments/assets/1738bb21-05a4-4218-a515-6a2eebcb9f65" />
 
-The system uses a modular deployment:
-1. **Application Stack:** FastAPI, Streamlit, MLflow, and Monitoring services.
-2. **Orchestration Stack:** Apache Airflow (separate containerized stack) managing hourly ingestion, cleanup, and drift detection.
 
-```text
-OpenAQ v3 API + Open-Meteo ──► Airflow DAGs (Ingestion/Drift) ───► SQLite DB
-                                                                    │
-   Streamlit ──► FastAPI Backend ───► MLflow Server ───► LightGBM Model
-   Frontend         │                                           │
-                    └──► Prometheus ───► Grafana ───────────────┘
-```
+**Key Components:**
+- **Streamlit UI (:8501):** Interactive dashboard for city selection and 24-hour AQI forecasts.
+- **FastAPI Backend (:8000):** Core REST API managing predictions, health checks, and metrics.
+- **MLflow Server (:5001):** Hosts the trained LightGBM model for inference.
+- **SQLite DB:** Live data buffer shared between FastAPI and Airflow.
+- **Apache Airflow (:8080):** Separate stack for hourly data ingestion from OpenAQ/Open-Meteo.
+- **Prometheus/Grafana:** Full observability stack for drift monitoring and system health.
+
+**Data Flow:** OpenAQ → Airflow → SQLite → FastAPI → LightGBM → Streamlit
 
 ---
 
