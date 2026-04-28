@@ -78,11 +78,16 @@ AQIPredictor/
 ├── airflow/
 │   └── dags/
 ├── frontend/
+├── mlflow/
 ├── monitoring/
 ├── tests/
 ├── docker-compose.yml
-├── openapi.yaml
+├── scripts/    #files used for training
+└── dvc.yaml
+└── params.yaml
+└── eda.py
 └── README.md
+
 ```
 
 The backend contains the FastAPI application, model logic, data services, and monitoring utilities. Airflow DAGs manage ingestion and cleanup, while the frontend provides the Streamlit dashboard. [file:3]
