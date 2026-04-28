@@ -1,0 +1,184 @@
+stages:
+  setup_config:
+    cmd: python scripts/setup_config.py
+      --kaggle-st data/raw/cpcb/stations.csv
+      --mode ${mode}
+      --city ${city}
+      --out config/stations.csv
+    deps:
+      - scripts/setup_config.py
+      - data/raw/cpcb/stations.csv
+    params:
+      - mode
+      - city
+    outs:
+      - config/stations.csv
+
+
+  prepare_pollution:
+    cmd: python scripts/prepare_pollution.py
+      --input data/raw/cpcb/station_hour.csv
+      --kaggle-st data/raw/cpcb/stations.csv
+      --config-st config/stations.csv
+      --mode ${mode}
+      --city ${city}
+      --start ${data.start_date}
+      --end ${data.end_date}
+      --output data/interim/pollution.parquet
+    deps:
+      - scripts/prepare_pollution.py
+      - data/raw/cpcb/station_hour.csv
+      - data/raw/cpcb/stations.csv
+      - config/stations.csv
+    params:
+      - mode
+      - city
+      - data.start_date
+      - data.end_date
+    outs:
+      - data/interim/pollution.parquet
+
+
+  fetch_weather:
+    cmd: python scripts/fetch_weather.py
+      --stations config/stations.csv
+      --config config/weather_vars.yaml
+      --start ${data.start_date}
+      --end ${data.end_date}
+      --raw-dir data/raw/openmeteo
+      --output data/interim/weather.parquet
+    deps:
+      - scripts/fetch_weather.py
+      - config/stations.csv
+      - config/weather_vars.yaml
+    params:
+      - data.start_date
+      - data.end_date
+    outs:
+      - data/interim/weather.parquet
+      - data/raw/openmeteo
+
+
+  merge:
+    cmd: python scripts/merge.py
+      --pollution data/interim/pollution.parquet
+      --weather data/interim/weather.parquet
+      --output data/processed/training_data.parquet
+    deps:
+      - scripts/merge.py
+      - data/interim/pollution.parquet
+      - data/interim/weather.parquet
+    outs:
+      - data/processed/training_data.parquet
+
+
+  validate:
+    cmd: python scripts/validate.py
+      --input data/processed/training_data.parquet
+    deps:
+      - scripts/validate.py
+      - data/processed/training_data.parquet
+
+
+  preprocess:
+    cmd: python scripts/preprocess.py
+      --input data/processed/training_data.parquet
+      --output data/processed/features.parquet
+      --null-threshold ${preprocess.null_threshold}
+    deps:
+      - scripts/preprocess.py
+      - data/processed/training_data.parquet
+    params:
+      - preprocess.null_threshold
+    outs:
+      - data/processed/features.parquet
+      - data/processed/city_label_encoder.pkl
+
+
+  preprocess_lstm:
+    cmd: python scripts/preprocess_lstm.py
+      --input data/processed/training_data.parquet
+      --output data/processed/features_lstm.parquet
+      --null-threshold ${preprocess.null_threshold}
+      --seq-len ${lstm.seq_len}
+    deps:
+      - scripts/preprocess_lstm.py
+      - data/processed/training_data.parquet
+    params:
+      - preprocess.null_threshold
+      - lstm.seq_len
+    outs:
+      - data/processed/features_lstm.parquet
+      - data/processed/lstm_scaler.pkl
+      - data/processed/lstm_meta.pkl
+      - data/processed/city_label_encoder_lstm.pkl
+
+
+
+  train:
+    cmd: python scripts/train.py
+    deps:
+      - scripts/train.py
+      - data/processed/features.parquet
+    params:
+      - training
+      - lgbm
+      - xgboost
+    outs:
+      - models/:
+          cache: true
+          push: true
+    metrics:
+      - metrics/scores.json:
+          cache: false
+
+
+  train_lstm:
+    cmd: python scripts/train_lstm.py
+    deps:
+      - scripts/train_lstm.py
+      - data/processed/features_lstm.parquet
+      - data/processed/lstm_scaler.pkl
+    params:
+      - lstm
+    metrics:
+      - metrics/lstm_scores.json:
+          cache: false
+
+
+  evaluate:
+    cmd: python scripts/evaluate.py
+    deps:
+      - scripts/evaluate.py
+      - models/
+      - data/processed/features.parquet
+    params:
+      - training
+    metrics:
+      - metrics/eval_scores.json:
+          cache: false
+
+
+  evaluate_lstm:
+    cmd: python scripts/evaluate_lstm.py
+    deps:
+      - scripts/evaluate_lstm.py
+      - models/lstm_model.pt
+      - data/processed/features_lstm.parquet
+      - data/processed/lstm_scaler.pkl
+    params:
+      - lstm
+    metrics:
+      - metrics/lstm_eval_scores.json:
+          cache: false
+
+
+plots:
+  - metrics/eval_scores.json:
+      template: bar_horizontal
+      x: value
+      y: metric
+  - metrics/lstm_eval_scores.json:
+      template: bar_horizontal
+      x: value
+      y: metric

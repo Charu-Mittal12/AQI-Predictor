@@ -1,0 +1,29 @@
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'your email here'
+  smtp_auth_username: 'your email here'
+  smtp_auth_password: 'your key here'  
+  smtp_require_tls: true
+
+route:
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 1h
+  receiver: 'email-alert'
+
+receivers:
+  - name: 'email-alert'
+    email_configs:
+      - to: 'mittalcharu.59@gmail.com'
+        headers:
+          Subject: '🚨 AQI Alert: {{ .GroupLabels.alertname }}'
+        html: |
+          {{ range .Alerts }}
+          <b>Alert:</b> {{ .Labels.alertname }}<br>
+          <b>Severity:</b> {{ .Labels.severity }}<br>
+          <b>Summary:</b> {{ .Annotations.summary }}<br>
+          <b>Time:</b> {{ .StartsAt }}<br>
+          {{ end }}
+        send_resolved: true

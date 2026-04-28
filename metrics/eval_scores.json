@@ -1,0 +1,18 @@
+{
+  "model": "xgboost",
+  "test_mae": 22.0957,
+  "test_rmse": 42.702,
+  "test_r2": 0.8588,
+  "test_mae_t1": 3.6651,
+  "test_rmse_t1": 13.0001,
+  "test_r2_t1": 0.9869,
+  "test_mae_t6": 15.4745,
+  "test_rmse_t6": 31.8971,
+  "test_r2_t6": 0.9213,
+  "test_mae_t12": 23.6435,
+  "test_rmse_t12": 44.1993,
+  "test_r2_t12": 0.8488,
+  "test_mae_t24": 33.5399,
+  "test_rmse_t24": 56.5674,
+  "test_r2_t24": 0.752
+}

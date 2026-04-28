@@ -1,0 +1,147 @@
+groups:
+  - name: aqi-platform-alerts
+    rules:
+
+      # ── System Health ──────────────────────────────────────────────────────
+      - alert: BackendDown
+        expr: up{job="backend"} == 0
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backend is down"
+          description: "Prometheus cannot scrape the FastAPI backend for more than 1 minute."
+
+      - alert: FrontendDown
+        expr: up{job="frontend"} == 0
+        for: 30m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Frontend is down"
+          description: "Prometheus cannot reach the Streamlit frontend health endpoint."
+
+      - alert: ModelNotReady
+        expr: aqi_model_ready < 1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Model not ready"
+          description: "Backend is running but model readiness metric is 0."
+
+      # ── Prediction Pipeline ────────────────────────────────────────────────
+      - alert: HighPredictionErrorRate
+        expr: >
+          (sum(rate(aqi_predict_requests_total{status="error"}[5m])) or vector(0))
+          /
+          (sum(rate(aqi_predict_requests_total[5m])) + 1e-9) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prediction error rate above 5%"
+          description: "More than 5% of prediction requests are failing. Current rate: {{ $value | humanizePercentage }}."
+
+      - alert: HighPredictionLatency
+        expr: histogram_quantile(0.95, sum(rate(aqi_predict_latency_seconds_bucket[5m])) by (le)) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High prediction latency"
+          description: "P95 prediction latency is above 10 seconds."
+
+      - alert: NoPredictionsServed
+        expr: sum(rate(aqi_predict_requests_total[10m])) == 0
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No predictions being served"
+          description: "No prediction requests have been processed in the last 10 minutes."
+
+      # ── Data Freshness ─────────────────────────────────────────────────────
+      - alert: StaleData
+        expr: max(aqi_latest_db_age_hours) > 3
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Live data is stale"
+          description: "Latest DB reading is {{ $value | humanize }} hours old. Live fetch pipeline may be failing."
+
+      - alert: LiveFetchFailing
+        expr: >
+          sum(rate(aqi_live_fetch_requests_total{status="failed"}[10m])) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Live fetch requests are failing"
+          description: "OpenAQ data fetch is returning errors."
+
+      - alert: NoLiveRowsIngested
+        expr: sum(rate(aqi_live_fetch_rows_total[30m])) == 0
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No live data rows ingested in 30 minutes"
+          description: "Live data pipeline has stopped writing rows to SQLite."
+
+      # ── Data Drift ─────────────────────────────────────────────────────────
+      - alert: DataDriftDetected
+        expr: max(aqi_drift_detected) > 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Data drift detected"
+          description: "One or more features are drifted (PSI + KS + Z-score all triggered)."
+
+      - alert: HighDriftPSI
+        expr: max(aqi_drift_psi) > 0.25
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High PSI drift (> 0.25)"
+          description: "At least one feature has HIGH severity PSI above 0.25. Retraining is recommended."
+
+      - alert: ManyFeaturesDrifted
+        expr: aqi_drift_features_count >= 3
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $value }} features drifted — retrain required"
+          description: "Drift fraction has crossed the 40% retrain threshold."
+
+      # ── Infrastructure ─────────────────────────────────────────────────────
+      - alert: HighCPUUsage
+        expr: (100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "System CPU usage is above 85% for 5 minutes."
+
+      - alert: HighMemoryUsage
+        expr: ((1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "System memory usage is above 85% for 5 minutes."
+
+      - alert: LowDiskSpace
+        expr: ((node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100) < 10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low disk space"
+          description: "Available disk space on root mount is below 15%."

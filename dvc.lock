@@ -1,0 +1,236 @@
+schema: '2.0'
+stages:
+  setup_config:
+    cmd: python scripts/setup_config.py --kaggle-st data/raw/cpcb/stations.csv 
+      --mode all --city Chennai --out config/stations.csv
+    deps:
+    - path: data/raw/cpcb/stations.csv
+      hash: md5
+      md5: 5567840d30fee1770507b539a2cd1fdb
+      size: 14467
+    - path: scripts/setup_config.py
+      hash: md5
+      md5: eef0ed4e47373bda24df4bcfac293edb
+      size: 2162
+    params:
+      params.yaml:
+        city: Chennai
+        mode: all
+    outs:
+    - path: config/stations.csv
+      hash: md5
+      md5: d96dbca851b52b14496e585a34c1515d
+      size: 7155
+  prepare_pollution:
+    cmd: python scripts/prepare_pollution.py --input 
+      data/raw/cpcb/station_hour.csv --kaggle-st data/raw/cpcb/stations.csv 
+      --config-st config/stations.csv --mode all --city Chennai --start 
+      2015-01-01 --end 2020-12-31 --output data/interim/pollution.parquet
+    deps:
+    - path: config/stations.csv
+      hash: md5
+      md5: d96dbca851b52b14496e585a34c1515d
+      size: 7155
+    - path: data/raw/cpcb/station_hour.csv
+      hash: md5
+      md5: bac5800cb86bdab9459334cf8cfa748f
+      size: 219675434
+    - path: data/raw/cpcb/stations.csv
+      hash: md5
+      md5: 5567840d30fee1770507b539a2cd1fdb
+      size: 14467
+    - path: scripts/prepare_pollution.py
+      hash: md5
+      md5: e8e803cfaac6d6a48d463b72e3dd299a
+      size: 3066
+    params:
+      params.yaml:
+        city: Chennai
+        data.end_date: '2020-12-31'
+        data.start_date: '2015-01-01'
+        mode: all
+    outs:
+    - path: data/interim/pollution.parquet
+      hash: md5
+      md5: 4e02e274f44de348448c5f6cd70ee268
+      size: 44567459
+  fetch_weather:
+    cmd: python scripts/fetch_weather.py --stations config/stations.csv --config
+      config/weather_vars.yaml --start 2015-01-01 --end 2020-12-31 --raw-dir 
+      data/raw/openmeteo --output data/interim/weather.parquet
+    deps:
+    - path: config/stations.csv
+      hash: md5
+      md5: d96dbca851b52b14496e585a34c1515d
+      size: 7155
+    - path: config/weather_vars.yaml
+      hash: md5
+      md5: 743fb2ea7df669907fad0d928b57efc8
+      size: 167
+    - path: scripts/fetch_weather.py
+      hash: md5
+      md5: b0bd8465b5d0f1eabb202f061f796947
+      size: 3862
+    params:
+      params.yaml:
+        data.end_date: '2020-12-31'
+        data.start_date: '2015-01-01'
+    outs:
+    - path: data/interim/weather.parquet
+      hash: md5
+      md5: 34524e075ffd5b391334a9a17c8e3f64
+      size: 50165557
+    - path: data/raw/openmeteo
+      hash: md5
+      md5: f84f2aaa18a32e374d98b96f837d857e.dir
+      size: 87593217
+      nfiles: 33
+  merge:
+    cmd: python scripts/merge.py --pollution data/interim/pollution.parquet 
+      --weather data/interim/weather.parquet --output 
+      data/processed/training_data.parquet
+    deps:
+    - path: data/interim/pollution.parquet
+      hash: md5
+      md5: 4e02e274f44de348448c5f6cd70ee268
+      size: 44567459
+    - path: data/interim/weather.parquet
+      hash: md5
+      md5: 34524e075ffd5b391334a9a17c8e3f64
+      size: 50165557
+    - path: scripts/merge.py
+      hash: md5
+      md5: 3f06748245004f5f61abb667911238cb
+      size: 788
+    outs:
+    - path: data/processed/training_data.parquet
+      hash: md5
+      md5: d8460fd930d7c55cc2c3a924b7d46c32
+      size: 54017453
+  validate:
+    cmd: python scripts/validate.py --input data/processed/training_data.parquet
+    deps:
+    - path: data/processed/training_data.parquet
+      hash: md5
+      md5: d8460fd930d7c55cc2c3a924b7d46c32
+      size: 54017453
+    - path: scripts/validate.py
+      hash: md5
+      md5: 0aa9b0a7b8b7085e92c4b61ac307746f
+      size: 1034
+  preprocess:
+    cmd: python scripts/preprocess.py --input 
+      data/processed/training_data.parquet --output 
+      data/processed/features.parquet --null-threshold 0.8
+    deps:
+    - path: data/processed/training_data.parquet
+      hash: md5
+      md5: d8460fd930d7c55cc2c3a924b7d46c32
+      size: 54017453
+    - path: scripts/preprocess.py
+      hash: md5
+      md5: ff8caf435869aa08cbe16c2ada96d19f
+      size: 7413
+    params:
+      params.yaml:
+        preprocess.null_threshold: 0.8
+    outs:
+    - path: data/processed/city_label_encoder.pkl
+      hash: md5
+      md5: 9441b35a07892575b4541f859189d71e
+      size: 523
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: f0e12c1789745d1c4df9a6ef82ad1669
+      size: 2619594971
+  train:
+    cmd: python scripts/train.py
+    deps:
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: f0e12c1789745d1c4df9a6ef82ad1669
+      size: 2619594971
+    - path: scripts/train.py
+      hash: md5
+      md5: 5c750bd4af18c90725a0b166b82541a2
+      size: 16340
+    params:
+      params.yaml:
+        lgbm:
+          n_estimators: 200
+          learning_rate: 0.05
+          num_leaves: 31
+          max_depth: 6
+          min_child_samples: 50
+          optuna:
+            enabled: false
+            n_trials: 5
+            random_seed: 42
+            n_estimators_min: 100
+            n_estimators_max: 300
+            learning_rate_min: 0.01
+            learning_rate_max: 0.2
+            num_leaves_min: 20
+            num_leaves_max: 100
+            max_depth_min: 3
+            max_depth_max: 8
+            min_child_samples_min: 10
+            min_child_samples_max: 100
+        training:
+          model: xgboost
+          forecast_horizon: 24
+          sample_frac: 1.0
+        xgboost:
+          n_estimators: 500
+          learning_rate: 0.05
+          max_depth: 6
+          subsample: 0.8
+          optuna:
+            enabled: false
+            n_trials: 10
+            random_seed: 42
+            n_estimators_min: 100
+            n_estimators_max: 300
+            learning_rate_min: 0.01
+            learning_rate_max: 0.2
+            max_depth_min: 3
+            max_depth_max: 8
+            subsample_min: 0.6
+            subsample_max: 1.0
+    outs:
+    - path: metrics/scores.json
+      hash: md5
+      md5: 0ad4cafae515dc4a73be357864d26e65
+      size: 293
+    - path: models/
+      hash: md5
+      md5: ffc7f8f8a6c9c63e674a1c9d387eaccd.dir
+      size: 105111208
+      nfiles: 2
+  evaluate:
+    cmd: python scripts/evaluate.py
+    deps:
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: f0e12c1789745d1c4df9a6ef82ad1669
+      size: 2619594971
+    - path: models/
+      hash: md5
+      md5: ffc7f8f8a6c9c63e674a1c9d387eaccd.dir
+      size: 105111208
+      nfiles: 2
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 66b8f9909652d47c7c5ab8613512d407
+      size: 5549
+    params:
+      params.yaml:
+        training:
+          model: xgboost
+          forecast_horizon: 24
+          sample_frac: 1.0
+    outs:
+    - path: metrics/eval_scores.json
+      hash: md5
+      md5: 71d4524b5cb8cd2c2ce4e2e5dd335668
+      size: 403

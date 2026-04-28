@@ -1,0 +1,14 @@
+{
+  "model": "xgboost",
+  "val_mae": 26.3976,
+  "val_rmse": 65.5261,
+  "val_r2": 0.8031,
+  "val_mae_t1": 4.5562,
+  "val_rmse_t1": 21.6553,
+  "val_mae_t6": 17.967,
+  "val_rmse_t6": 50.5652,
+  "val_mae_t12": 28.0087,
+  "val_rmse_t12": 69.62,
+  "val_mae_t24": 40.1411,
+  "val_rmse_t24": 81.5599
+}
